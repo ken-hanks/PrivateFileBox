@@ -22,5 +22,10 @@ PrivateFileBox is a local file privacy protection app designed exclusively for i
 All files are stored exclusively in the app's local sandbox, eliminating the risk of cloud data leakage.
 
 
+<img width="563" height="1218" alt="image" src="https://github.com/user-attachments/assets/1479c5d0-ed93-4b35-9613-1fda059fba9c" />
+
+<img width="563" height="1218" alt="image" src="https://github.com/user-attachments/assets/d6c8435f-e3d7-4b09-915e-f375696142fa" />
+
+
 
 
