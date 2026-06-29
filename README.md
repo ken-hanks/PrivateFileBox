@@ -1,4 +1,4 @@
-# PrivateFileBox
+<img width="563" height="1218" alt="7FEE9858-319B-4053-9C46-B3195BDECDF6" src="https://github.com/user-attachments/assets/ef1da8c2-8580-4a57-b297-5300a9c070a8" /># PrivateFileBox
 
 #### 介绍
 PrivateFileBox 私密文件柜 是一款专为 iOS 设计的本地文件隐私保护应用。核心功能包括：
@@ -21,6 +21,7 @@ PrivateFileBox is a local file privacy protection app designed exclusively for i
 6. Personalized Settings : Change access passwords, adjust video import quality, and customize other preferences anytime.
 All files are stored exclusively in the app's local sandbox, eliminating the risk of cloud data leakage.
 
+<img width="1125" height="2436" alt="image" src="https://github.com/user-attachments/assets/1479c5d0-ed93-4b35-9613-1fda059fba9c" />
 
 
 
