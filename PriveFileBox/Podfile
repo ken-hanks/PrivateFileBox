@@ -1,0 +1,12 @@
+platform :ios, '13.0'
+inhibit_all_warnings!
+
+source 'https://github.com/CocoaPods/Specs.git'
+
+target :PrivateFileBox do
+#    pod 'Alamofire'
+    pod 'Kingfisher'
+    pod 'SwiftyJSON'
+    pod 'FSPagerView'
+end
+

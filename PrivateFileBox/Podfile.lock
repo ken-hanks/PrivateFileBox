@@ -1,0 +1,114 @@
+PODS:
+  - AssetsPickerViewController (2.9.7):
+    - SnapKit
+  - BMPlayer/CacheSupport (1.3.3):
+    - BMPlayer/Core
+    - NVActivityIndicatorView (~> 4.7.0)
+    - SnapKit (~> 5.0.0)
+    - VIMediaCache
+  - BMPlayer/Core (1.3.3)
+  - CDAlertView (0.11.0)
+  - collection-view-layouts/Core (0.2.2)
+  - collection-view-layouts/TagsLayout (0.2.2):
+    - collection-view-layouts/Core
+  - Eureka (5.5.0)
+  - FSPagerView (0.8.3)
+  - FTPopOverMenu_Swift (0.4.5)
+  - GCDWebServer/Core (3.5.4)
+  - GCDWebServer/WebUploader (3.5.4):
+    - GCDWebServer/Core
+  - Kingfisher (8.9.0)
+  - KRActivityIndicatorView (3.0.8)
+  - KRProgressHUD (3.4.8):
+    - KRActivityIndicatorView (= 3.0.8)
+  - MBVideoPlayer (0.1.3)
+  - NVActivityIndicatorView (4.7.0):
+    - NVActivityIndicatorView/Presenter (= 4.7.0)
+  - NVActivityIndicatorView/Presenter (4.7.0)
+  - ReachabilitySwift (5.2.4)
+  - SKPhotoBrowser (7.1.0)
+  - SnapKit (5.0.1)
+  - SwiftyJSON (5.0.2)
+  - TYProgressBar (0.8.1)
+  - VIMediaCache (0.4)
+  - ZWAlertController (0.3.0)
+
+DEPENDENCIES:
+  - AssetsPickerViewController
+  - BMPlayer/CacheSupport (from `https://github.com/BrikerMan/BMPlayer.git`)
+  - CDAlertView
+  - collection-view-layouts/Core
+  - collection-view-layouts/TagsLayout
+  - Eureka
+  - FSPagerView
+  - FTPopOverMenu_Swift
+  - GCDWebServer/WebUploader (~> 3.0)
+  - Kingfisher
+  - KRProgressHUD
+  - MBVideoPlayer (from `https://github.com/mwaqasbhati/MBVideoPlayer.git`)
+  - ReachabilitySwift
+  - SKPhotoBrowser
+  - SwiftyJSON
+  - TYProgressBar
+  - ZWAlertController
+
+SPEC REPOS:
+  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
+    - AssetsPickerViewController
+    - CDAlertView
+    - collection-view-layouts
+    - Eureka
+    - FSPagerView
+    - FTPopOverMenu_Swift
+    - GCDWebServer
+    - Kingfisher
+    - KRActivityIndicatorView
+    - KRProgressHUD
+    - NVActivityIndicatorView
+    - ReachabilitySwift
+    - SKPhotoBrowser
+    - SnapKit
+    - SwiftyJSON
+    - TYProgressBar
+    - VIMediaCache
+    - ZWAlertController
+
+EXTERNAL SOURCES:
+  BMPlayer:
+    :git: https://github.com/BrikerMan/BMPlayer.git
+  MBVideoPlayer:
+    :git: https://github.com/mwaqasbhati/MBVideoPlayer.git
+
+CHECKOUT OPTIONS:
+  BMPlayer:
+    :commit: 6956d0f23c3f4bf2424744effeea6ba8a5e0c43b
+    :git: https://github.com/BrikerMan/BMPlayer.git
+  MBVideoPlayer:
+    :commit: 5da802efb2f27a033f68bca9c4196b7a724b0808
+    :git: https://github.com/mwaqasbhati/MBVideoPlayer.git
+
+SPEC CHECKSUMS:
+  AssetsPickerViewController: 4343e10ace86e425097043c17efa145c1ec868ce
+  BMPlayer: d7c2c86b766a277f1889f330af274b0ff9c298f8
+  CDAlertView: cd6624e857c85ad14560e2cd23d7eb25b983b590
+  collection-view-layouts: 474ec4cce601a26247737227a97fa6a4eb30213f
+  Eureka: 1c18c7fcd8f772cc2ca42d6be36292dffa77eecb
+  FSPagerView: 670405b2f18e2a87fa37f20b00de783e562c25a8
+  FTPopOverMenu_Swift: d7320dcfb2de4249dc05e9d4313ecd143fc97b8f
+  GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
+  Kingfisher: 90f3a3c2871a71e01d5493c1c196fc2d3ff132cf
+  KRActivityIndicatorView: c5c503bf56e54834382dd926b64ff47287ca0006
+  KRProgressHUD: d0fb4e72428d312eb6966e84c543ea58fb1efbc7
+  MBVideoPlayer: 4d9e8c6a85b4e6dc48aba7ab36c0aea7fc364515
+  NVActivityIndicatorView: b19ddab2576f805cbe0fb2306cba3476e09a1dea
+  ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
+  SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
+  TYProgressBar: 1ec8ab0da29a6ccf80e20821388a8d2f484404c8
+  VIMediaCache: aa650f82cb114c68a343beb4e67416cf5eb2f3a2
+  ZWAlertController: 0c2c82e7e06cf3db4496d447397dc8c17f1fb93f
+
+PODFILE CHECKSUM: f0a1e0f1cf73dc3470bd2caa027452bc8b4c2bae
+
+COCOAPODS: 1.16.2

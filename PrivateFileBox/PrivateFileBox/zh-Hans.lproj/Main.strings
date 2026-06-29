@@ -1,0 +1,12 @@
+
+/* Class = "UILabel"; text = "Name"; ObjectID = "6rt-nM-2zV"; */
+"6rt-nM-2zV.text" = "Name";
+
+/* Class = "UIButton"; normalTitle = "操作"; ObjectID = "G7f-3n-LmF"; */
+"G7f-3n-LmF.normalTitle" = "操作";
+
+/* Class = "UITabBarItem"; title = "我的"; ObjectID = "XBx-j4-GhW"; */
+"XBx-j4-GhW.title" = "设置";
+
+/* Class = "UITabBarItem"; title = "文件柜"; ObjectID = "w4a-vf-IGL"; */
+"w4a-vf-IGL.title" = "文件柜";

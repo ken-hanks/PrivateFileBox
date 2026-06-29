@@ -1,0 +1,21 @@
+${PODS_ROOT}/Target Support Files/Pods-PrivateFileBox/Pods-PrivateFileBox-frameworks.sh
+${BUILT_PRODUCTS_DIR}/AssetsPickerViewController/AssetsPickerViewController.framework
+${BUILT_PRODUCTS_DIR}/BMPlayer/BMPlayer.framework
+${BUILT_PRODUCTS_DIR}/CDAlertView/CDAlertView.framework
+${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework
+${BUILT_PRODUCTS_DIR}/FSPagerView/FSPagerView.framework
+${BUILT_PRODUCTS_DIR}/FTPopOverMenu_Swift/FTPopOverMenu_Swift.framework
+${BUILT_PRODUCTS_DIR}/GCDWebServer/GCDWebServer.framework
+${BUILT_PRODUCTS_DIR}/KRActivityIndicatorView/KRActivityIndicatorView.framework
+${BUILT_PRODUCTS_DIR}/KRProgressHUD/KRProgressHUD.framework
+${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework
+${BUILT_PRODUCTS_DIR}/MBVideoPlayer/MBVideoPlayer.framework
+${BUILT_PRODUCTS_DIR}/NVActivityIndicatorView/NVActivityIndicatorView.framework
+${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework
+${BUILT_PRODUCTS_DIR}/SKPhotoBrowser/SKPhotoBrowser.framework
+${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework
+${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework
+${BUILT_PRODUCTS_DIR}/TYProgressBar/TYProgressBar.framework
+${BUILT_PRODUCTS_DIR}/VIMediaCache/VIMediaCache.framework
+${BUILT_PRODUCTS_DIR}/ZWAlertController/ZWAlertController.framework
+${BUILT_PRODUCTS_DIR}/collection-view-layouts/collection_view_layouts.framework

@@ -1,0 +1,29 @@
+platform :ios, '13.0'
+inhibit_all_warnings!
+
+source 'https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git'
+#source 'https://github.com/CocoaPods/Specs.git'
+
+target :PrivateFileBox do
+#    pod 'Alamofire'
+    pod 'Kingfisher'
+    pod 'SwiftyJSON'
+    pod 'FSPagerView'
+#    pod 'TBDropdownMenu'
+    pod 'AssetsPickerViewController'
+    pod 'CDAlertView'
+    pod 'FTPopOverMenu_Swift'
+    pod 'KRProgressHUD'
+    pod 'collection-view-layouts/Core'
+    pod 'collection-view-layouts/TagsLayout'
+    pod 'ZWAlertController'
+    pod 'SKPhotoBrowser'
+    pod 'TYProgressBar'
+    pod 'MBVideoPlayer', :git => 'https://github.com/mwaqasbhati/MBVideoPlayer.git'
+    pod 'GCDWebServer/WebUploader', '~> 3.0'
+    pod 'ReachabilitySwift'
+    pod 'Eureka'
+    pod 'BMPlayer/CacheSupport', :git => 'https://github.com/BrikerMan/BMPlayer.git'
+use_frameworks!
+end
+
