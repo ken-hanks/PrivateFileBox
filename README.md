@@ -1,4 +1,4 @@
-<img width="563" height="1218" alt="7FEE9858-319B-4053-9C46-B3195BDECDF6" src="https://github.com/user-attachments/assets/ef1da8c2-8580-4a57-b297-5300a9c070a8" /># PrivateFileBox
+# PrivateFileBox
 
 #### 介绍
 PrivateFileBox 私密文件柜 是一款专为 iOS 设计的本地文件隐私保护应用。核心功能包括：
