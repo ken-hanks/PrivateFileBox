@@ -8,6 +8,7 @@
 
 import UIKit
 import Photos
+import AVFoundation
 //import TBDropdownMenu
 import AssetsPickerViewController
 import CDAlertView
@@ -625,10 +626,18 @@ LayoutDelegate, PassVCDelegate{
         totalImportFileCount = self.assets.count
         copyedFileCount = 0
         self.showHud(message: "正在导入，请稍候...")
-        for asset in self.assets
-        {
-            saveVideo(asset: asset)
+        var idx = 0
+        func processNext() {
+            guard idx < self.assets.count else { return }
+            let asset = self.assets[idx]
+            idx += 1
+            self.saveVideo(asset: asset) {
+                DispatchQueue.main.async {
+                    processNext()
+                }
+            }
         }
+        processNext()
     }
     
     //MARK: - 将指定的asset保存到当前目录下
@@ -707,7 +716,7 @@ LayoutDelegate, PassVCDelegate{
     }
     
     //MARK: - 保存视频
-    func saveVideo(asset: PHAsset)
+    func saveVideo(asset: PHAsset, completion: (() -> Void)? = nil)
     {
         let globalConfig = GlobalConfig.getInstance()
         let option = PHVideoRequestOptions()
@@ -720,7 +729,7 @@ LayoutDelegate, PassVCDelegate{
         case 1:
             option.deliveryMode = .mediumQualityFormat
         case 2:
-            if #available(iOS 13.0,*)       //iOS13开始才支持高质量
+            if #available(iOS 13.0,*)
             {
                 option.deliveryMode = .highQualityFormat
             }
@@ -731,33 +740,171 @@ LayoutDelegate, PassVCDelegate{
         default:
             option.deliveryMode = .fastFormat
         }
-        PHCachingImageManager.default().requestExportSession(forVideo: asset, options: option, exportPreset: AVAssetExportPresetHighestQuality) { (exportSession, info) in
-            guard let exportSession = exportSession, let destPath = self.stackPath.last?.path else {
-                self.showPop(type: .error, message: "导出视频失败")
+        
+        let finishExport: (PHAsset, AVAssetExportSession, URL) -> Void = { asset, session, destFolder in
+            let timestamp = Int(NSDate().timeIntervalSince1970 * 100)
+            let uniqName = "\(timestamp)_\(Int.random(in: 0..<1000)).mp4"
+            let destURL = destFolder.appendingPathComponent(uniqName)
+            session.outputURL = destURL
+            session.outputFileType = .mp4
+            session.shouldOptimizeForNetworkUse = true
+            session.exportAsynchronously {
+                DispatchQueue.main.async {
+                    switch session.status {
+                    case .completed:
+                        self.refreshCopyCount(mediaType: asset.mediaType)
+                    case .failed:
+                        self.refreshCopyCount(mediaType: asset.mediaType)
+                    case .cancelled:
+                        self.refreshCopyCount(mediaType: asset.mediaType)
+                    default:
+                        break
+                    }
+                    completion?()
+                }
+            }
+        }
+        
+        let handleFailure: (String) -> Void = { msg in
+            DispatchQueue.main.async {
+                self.showPop(type: .error, message: msg)
+                self.refreshCopyCount(mediaType: asset.mediaType)
+                completion?()
+            }
+        }
+        
+        let qualityPreset: String = {
+            switch globalConfig.videoImportQuality {
+            case 0: return AVAssetExportPresetMediumQuality
+            case 2: return AVAssetExportPresetHighestQuality
+            default: return AVAssetExportPresetHighestQuality
+            }
+        }()
+        
+        PHCachingImageManager.default().requestExportSession(forVideo: asset, options: option, exportPreset: qualityPreset) { (exportSession, info) in
+            let inCloud = (info?[PHImageResultIsInCloudKey] as? Bool) ?? false
+            let isCancelled = (info?[PHImageCancelledKey] as? Bool) ?? false
+            
+            if let session = exportSession, let destPath = self.stackPath.last {
+                finishExport(asset, session, destPath as URL)
                 return
             }
             
-            let destName = String(Int(NSDate().timeIntervalSince1970 * 100)) + ".mp4"
-            let fullDestName = destPath + "/" + destName
-            exportSession.outputURL = URL(fileURLWithPath: fullDestName)
-            exportSession.outputFileType = .mp4
-            exportSession.exportAsynchronously {
-                switch exportSession.status {
-                case .completed:
-                    DispatchQueue.main.async {
-                        self.refreshCopyCount(mediaType: asset.mediaType)
-                    }
-                case .failed:
-                    //print(exportSession.error)
-                    DispatchQueue.main.async {
-                        self.refreshCopyCount(mediaType: asset.mediaType)
-                    }
-
-                    
-                default:
-                    break
-                }
+            if isCancelled {
+                handleFailure("用户取消了视频导出")
+                return
             }
+            
+            // 视频在 iCloud 云端 或 网络权限弹窗导致 exportSession 为 nil，
+            // 退回 requestAVAsset 走带 progressHandler 的下载+手动导出流程
+            if inCloud || exportSession == nil {
+                let fallbackOption = PHVideoRequestOptions()
+                fallbackOption.isNetworkAccessAllowed = true
+                fallbackOption.version = .current
+                fallbackOption.deliveryMode = .automatic
+                fallbackOption.progressHandler = { (progress, _, stop, _) in
+                    DispatchQueue.main.async {
+                        if progress > 0 {
+                            self.showHud(message: String(format: "正在从 iCloud 下载视频 %.0f%%", progress * 100))
+                        }
+                        if progress >= 1.0 {
+                            self.showHud(message: "正在导入，请稍候...")
+                        }
+                        if progress < 0 {
+                            stop.pointee = true
+                        }
+                    }
+                }
+                
+                PHCachingImageManager.default().requestAVAsset(forVideo: asset, options: fallbackOption) { (avAsset, _, _) in
+                    guard let sourceAV = avAsset else {
+                        handleFailure("视频资源不可用，请确认已允许网络访问后重试")
+                        return
+                    }
+                    guard let destFolder = self.stackPath.last else {
+                        handleFailure("获取目标文件夹失败")
+                        return
+                    }
+                    
+                    let finishCopyFromTemp: (URL, @escaping () -> Void) -> Void = { srcURL, done in
+                        let timestamp = Int(NSDate().timeIntervalSince1970 * 100)
+                        let uniqName = "\(timestamp)_\(Int.random(in: 0..<1000)).mp4"
+                        let destURL = destFolder.appendingPathComponent(uniqName)
+                        do {
+                            if FileManager.default.fileExists(atPath: destURL.path) {
+                                try FileManager.default.removeItem(at: destURL)
+                            }
+                            try FileManager.default.copyItem(at: srcURL, to: destURL)
+                            DispatchQueue.main.async {
+                                self.refreshCopyCount(mediaType: asset.mediaType)
+                                done()
+                            }
+                        } catch {
+                            // copy 失败（格式不匹配/权限等），走 AVAssetExportSession 重编码
+                            guard let export = AVAssetExportSession(asset: sourceAV, presetName: qualityPreset) else {
+                                handleFailure("创建视频导出会话失败，请稍后重试")
+                                return
+                            }
+                            finishExport(asset, export, destFolder as URL)
+                        }
+                    }
+                    
+                    // AVURLAsset：先尝试直接复制临时文件（快速路径）
+                    if let urlAsset = sourceAV as? AVURLAsset {
+                        finishCopyFromTemp(urlAsset.url) {
+                            completion?()
+                        }
+                        return
+                    }
+                    
+                    // AVComposition / 其它组合素材：先导出到 temp，再 move 到目标目录
+                    let tempDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                    let tempURL = tempDir.appendingPathComponent("pfb_vtmp_\(Int.random(in: 0..<999999)).mp4")
+                    guard let export = AVAssetExportSession(asset: sourceAV, presetName: qualityPreset) else {
+                        handleFailure("创建视频导出会话失败，请稍后重试")
+                        return
+                    }
+                    export.outputURL = tempURL
+                    export.outputFileType = .mp4
+                    export.shouldOptimizeForNetworkUse = true
+                    export.exportAsynchronously {
+                        switch export.status {
+                        case .completed:
+                            let timestamp = Int(NSDate().timeIntervalSince1970 * 100)
+                            let uniqName = "\(timestamp)_\(Int.random(in: 0..<1000)).mp4"
+                            let destURL = destFolder.appendingPathComponent(uniqName)
+                            do {
+                                if FileManager.default.fileExists(atPath: destURL.path) {
+                                    try FileManager.default.removeItem(at: destURL)
+                                }
+                                try FileManager.default.moveItem(at: tempURL, to: destURL)
+                                DispatchQueue.main.async {
+                                    self.refreshCopyCount(mediaType: asset.mediaType)
+                                    completion?()
+                                }
+                            } catch {
+                                DispatchQueue.main.async {
+                                    self.showPop(type: .error, message: "保存视频文件失败")
+                                    self.refreshCopyCount(mediaType: asset.mediaType)
+                                    completion?()
+                                }
+                            }
+                            try? FileManager.default.removeItem(at: tempURL)
+                        case .failed, .cancelled:
+                            DispatchQueue.main.async {
+                                self.refreshCopyCount(mediaType: asset.mediaType)
+                                completion?()
+                            }
+                            try? FileManager.default.removeItem(at: tempURL)
+                        default:
+                            break
+                        }
+                    }
+                }
+                return
+            }
+            
+            handleFailure("导出视频失败")
         }
     }
     
