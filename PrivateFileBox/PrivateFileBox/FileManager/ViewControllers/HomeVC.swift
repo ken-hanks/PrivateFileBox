@@ -431,11 +431,11 @@ LayoutDelegate, PassVCDelegate{
     var selectedIndex : NSInteger = 0
     @IBAction func onBtnRightClicked(_ sender: UIBarButtonItem, event: UIEvent) {
         
-        let menuModelArray : [FTPopOverMenuModel] = [FTPopOverMenuModel(title: "导入本机照片", image: "", selected: self.selectedIndex == 0),
-                                                     FTPopOverMenuModel(title: "导入本机视频", image: "", selected: self.selectedIndex == 1),
-                                                     FTPopOverMenuModel(title: "WIFI传输文件", image: "", selected: self.selectedIndex == 2),
-                                                     FTPopOverMenuModel(title: "创建目录", image: "", selected: self.selectedIndex == 3),
-                                                     FTPopOverMenuModel(title: "选择", image: "", selected: self.selectedIndex == 4)]
+        let menuModelArray : [FTPopOverMenuModel] = [FTPopOverMenuModel(title: "导入本机照片", image: nil, selected: self.selectedIndex == 0),
+                                                     FTPopOverMenuModel(title: "导入本机视频", image: nil, selected: self.selectedIndex == 1),
+                                                     FTPopOverMenuModel(title: "WIFI传输文件", image: nil, selected: self.selectedIndex == 2),
+                                                     FTPopOverMenuModel(title: "创建目录", image: nil, selected: self.selectedIndex == 3),
+                                                     FTPopOverMenuModel(title: "选择", image: nil, selected: self.selectedIndex == 4)]
 
         
         let config = FTConfiguration()
