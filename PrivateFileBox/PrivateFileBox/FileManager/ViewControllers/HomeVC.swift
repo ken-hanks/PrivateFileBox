@@ -9,6 +9,7 @@
 import UIKit
 import Photos
 import AVFoundation
+import UniformTypeIdentifiers
 //import TBDropdownMenu
 import AssetsPickerViewController
 import CDAlertView
@@ -22,7 +23,7 @@ import TYProgressBar
 
 class HomeVC: BaseViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout,
 UIImagePickerControllerDelegate, UINavigationControllerDelegate, AssetsPickerViewControllerDelegate,
-LayoutDelegate, PassVCDelegate{
+LayoutDelegate, PassVCDelegate, UIDocumentPickerDelegate{
 
     @IBOutlet var collectMain: UICollectionView!
     @IBOutlet var viewPad: UIView!
@@ -434,9 +435,10 @@ LayoutDelegate, PassVCDelegate{
         
         let menuModelArray : [FTPopOverMenuModel] = [FTPopOverMenuModel(title: "导入本机照片", image: nil, selected: self.selectedIndex == 0),
                                                      FTPopOverMenuModel(title: "导入本机视频", image: nil, selected: self.selectedIndex == 1),
-                                                     FTPopOverMenuModel(title: "WIFI传输文件", image: nil, selected: self.selectedIndex == 2),
-                                                     FTPopOverMenuModel(title: "创建目录", image: nil, selected: self.selectedIndex == 3),
-                                                     FTPopOverMenuModel(title: "选择", image: nil, selected: self.selectedIndex == 4)]
+                                                     FTPopOverMenuModel(title: "导入本机文件", image: nil, selected: self.selectedIndex == 2),
+                                                     FTPopOverMenuModel(title: "WIFI传输文件", image: nil, selected: self.selectedIndex == 3),
+                                                     FTPopOverMenuModel(title: "创建目录", image: nil, selected: self.selectedIndex == 4),
+                                                     FTPopOverMenuModel(title: "选择", image: nil, selected: self.selectedIndex == 5)]
 
         
         let config = FTConfiguration()
@@ -463,10 +465,12 @@ LayoutDelegate, PassVCDelegate{
                                     case 1:
                                         self.popVideoPicker()
                                     case 2:
-                                        self.performSegue(withIdentifier: "ShowHttpServer", sender: self)
+                                        self.popDocumentPicker()
                                     case 3:
-                                        self.beginCreateFolder()
+                                        self.performSegue(withIdentifier: "ShowHttpServer", sender: self)
                                     case 4:
+                                        self.beginCreateFolder()
+                                    case 5:
                                         self.switchSelectionMode()
                                     default:
                                         break
@@ -525,6 +529,143 @@ LayoutDelegate, PassVCDelegate{
         ]
         picker.pickerConfig = pickerConfig
         present(picker, animated: true, completion: nil)
+    }
+    
+    //MARK: - 弹出系统文件选择界面（选择本机文件）
+    func popDocumentPicker()
+    {
+        var baseTypes: [UTType] = [
+            .pdf,
+            .rtf, .html, .xml, .json, .yaml,
+            .zip, .archive, .data, .log,
+            .audio, .wav, .mp3, .aiff,
+            .video, .avi,
+            .image, .jpeg, .png, .gif, .heic, .bmp, .tiff, .ico,
+            .text, .content, .item, .directory,
+            .spreadsheet, .presentation, .message
+        ]
+        if #available(iOS 15.0, *) {
+            let extras: [String] = ["doc","docx","xls","xlsx","ppt","pptx","txt","csv",
+                                    "m4a","aac","flac","mp4","mov","m4v","webp",
+                                    "rar","7z","tar","gz","key","numbers","pages"]
+            for ext in extras {
+                if let t = UTType(filenameExtension: ext) {
+                    if !baseTypes.contains(t) { baseTypes.append(t) }
+                }
+            }
+        }
+        let picker: UIDocumentPickerViewController
+        if #available(iOS 14.0, *) {
+            picker = UIDocumentPickerViewController(forOpeningContentTypes: baseTypes, asCopy: true)
+        } else {
+            picker = UIDocumentPickerViewController(documentTypes: [
+                "public.item", "public.data", "public.content",
+                "public.audiovisual-content", "public.composite-content",
+                "public.presentation", "public.spreadsheet"
+            ], in: .import)
+        }
+        picker.delegate = self
+        picker.allowsMultipleSelection = true
+        picker.shouldShowFileExtensions = true
+        if #available(iOS 13.0, *) {
+            picker.directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        }
+        self.present(picker, animated: true, completion: nil)
+    }
+    
+    //MARK: - 导入从文件App中选中的文档
+    fileprivate func importDocuments(at urls: [URL])
+    {
+        guard let destFolder = self.stackPath.last else {
+            self.showPop(type: .error, message: "目标文件夹不存在")
+            return
+        }
+        let fileManager = FileManager.default
+        totalImportFileCount = urls.count
+        copyedFileCount = 0
+        if urls.count > 1 {
+            self.showHud(message: String(format: "正在导入 %d 个文件...", urls.count))
+        } else if urls.count == 1 {
+            self.showHud(message: "正在导入文件...")
+        }
+        
+        let group = DispatchGroup()
+        let ioQueue = DispatchQueue(label: "PrivateFileBox.documentImport", attributes: .concurrent)
+        for srcURL in urls {
+            group.enter()
+            ioQueue.async {
+                let accessed = srcURL.startAccessingSecurityScopedResource()
+                defer {
+                    if accessed {
+                        srcURL.stopAccessingSecurityScopedResource()
+                    }
+                }
+                let origName = srcURL.lastPathComponent.isEmpty ? "Document_\(Int(NSDate().timeIntervalSince1970))" : srcURL.lastPathComponent
+                var fileName = origName
+                var destURL = destFolder.appendingPathComponent(fileName)
+                var dupIdx = 1
+                while fileManager.fileExists(atPath: destURL.path) {
+                    let ns = origName as NSString
+                    let ext = ns.pathExtension
+                    let base = ns.deletingPathExtension
+                    fileName = ext.isEmpty ? "\(base)_\(dupIdx)" : "\(base)_\(dupIdx).\(ext)"
+                    destURL = destFolder.appendingPathComponent(fileName)
+                    dupIdx += 1
+                    if dupIdx > 9999 { break }
+                }
+                do {
+                    if fileManager.fileExists(atPath: destURL.path) {
+                        try fileManager.removeItem(at: destURL)
+                    }
+                    try fileManager.copyItem(at: srcURL, to: destURL)
+                } catch {
+                    DispatchQueue.main.async {
+                        self.showPop(type: .error, message: String(format: "文件 %@ 导入失败", origName))
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.copyedFileCount += 1
+                    if self.copyedFileCount == self.totalImportFileCount {
+                        self.refreshFolder()
+                        self.showPop(type: .success, message: "文件导入完成")
+                    }
+                }
+                group.leave()
+            }
+        }
+    }
+    
+    //MARK: - UIDocumentPickerDelegate
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard !urls.isEmpty else { return }
+        if urls.count == 1 {
+            let name = urls.first!.lastPathComponent
+            let msg = String(format: "将文件「%@」导入到当前文件夹吗？", name)
+            let alert = CDAlertView(title: "确认导入", message: msg, type: .notification)
+            let noAction = CDAlertViewAction(title: "算了", handler: { _ in true })
+            alert.add(action: noAction)
+            let yesAction = CDAlertViewAction(title: "确定", handler: { _ in
+                self.importDocuments(at: urls)
+                return true
+            })
+            alert.add(action: yesAction)
+            alert.show()
+        } else {
+            let msg = String(format: "将这 %d 个文件导入到当前文件夹吗？", urls.count)
+            let alert = CDAlertView(title: "确认导入", message: msg, type: .notification)
+            let noAction = CDAlertViewAction(title: "算了", handler: { _ in true })
+            alert.add(action: noAction)
+            let yesAction = CDAlertViewAction(title: "确定", handler: { _ in
+                self.importDocuments(at: urls)
+                return true
+            })
+            alert.add(action: yesAction)
+            alert.show()
+        }
+    }
+    
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        logi("Document picker cancelled.")
     }
     
     //MARK: - AssetsPickerViewControllerDelegate
